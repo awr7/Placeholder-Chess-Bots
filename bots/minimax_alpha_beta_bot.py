@@ -1,10 +1,9 @@
 """ Bot that follows the minimax algorithm to decide the best move """
 import chess
 
-def terminal(board):
-    return board.is_checkmate() or board.is_stalemate() or board.is_insufficient_material()
-
-CHECKMATE_SCORE = 10000
+CHECKMATE_SCORE = 1000000
+INFINITY = float('inf')
+transposition_table = {}
 
 piece_square_tables = {
     'P':[
@@ -69,12 +68,23 @@ piece_square_tables = {
     ]
 }
 
+piece_values = {
+    'P': 100, 'N': 320, 'B': 330, 'R': 500, 'Q': 900, 'K': 20000,
+    'p': -100, 'n': -320, 'b': -330, 'r': -500, 'q': -900, 'k': -20000
+}
+
+def terminal(board):
+    return board.is_checkmate() or board.is_stalemate() or board.is_insufficient_material()
+
 def get_piece_square_score(piece, square):
+    if not piece:
+        return 0
     piece_type = piece.symbol().upper()
     is_white = piece.color == chess.WHITE
     table = piece_square_tables.get(piece_type, [0] * 64)
     index = square if is_white else 63 - square
     return table[index]
+
 
 def evaluate_board(board):
     if board.is_checkmate():
@@ -82,79 +92,138 @@ def evaluate_board(board):
     if board.is_stalemate() or board.is_insufficient_material():
         return 0
 
-    piece_values = {
-        'P': 100, 'N': 320, 'B': 330, 'R': 500, 'Q': 900, 'K': 20000,
-        'p': -100, 'n': -320, 'b': -330, 'r': -500, 'q': -900, 'k': -20000
-    }
     score = 0
-
     for square in chess.SQUARES:
         piece = board.piece_at(square)
         if piece:
-            # Adjust score based on piece value
+            # Adjust the score based on piece value and position
             score += piece_values.get(piece.symbol(), 0)
-            # Adjust score based on piece square table
             score += get_piece_square_score(piece, square)
+
+            # Encourage development and central control
+            if piece.piece_type != chess.PAWN:
+                score += len(board.attacks(square)) * 10  # Bonus for active pieces
+                
+    # Penalty for attacks on king
+    king_square = board.king(board.turn)
+    if king_square:
+        score -= len(board.attackers(not board.turn, king_square)) * 50
 
     return score
 
+
+
+def quiescence_search(board, alpha, beta):
+    stand_pat = evaluate_board(board)
+    if stand_pat >= beta:
+        return beta
+    if alpha < stand_pat:
+        alpha = stand_pat
+
+    for move in board.legal_moves:
+        if board.is_capture(move):
+            board.push(move)
+            score = -quiescence_search(board, -beta, -alpha)
+            board.pop()
+
+            if score >= beta:
+                return beta
+            if score > alpha:
+                alpha = score
+
+    return alpha
+
 def sort_moves(board):
     legal_moves = list(board.legal_moves)
-    return sorted(legal_moves, key=lambda move: evaluate_move(board, move), reverse=True)
+    return sorted(legal_moves, key=lambda move: evaluate_move(board, move), reverse=board.turn)
 
 def evaluate_move(board, move):
-    # Simple heuristic: prioritize captures
-    if board.is_capture(move):
-        return 10
+    score = 0
+
+    board.push(move)
+
+    # Immediate checkmate check
+    if board.is_checkmate():
+        score += CHECKMATE_SCORE
     else:
-        return 0
+        moving_piece = board.piece_at(move.from_square)
+        captured_piece = board.piece_at(move.to_square)
+        
+        if moving_piece:
+            score += get_piece_square_score(moving_piece, move.to_square)
+            moving_piece_value = piece_values.get(moving_piece.symbol(), 0)
+
+            if captured_piece:
+                captured_piece_value = piece_values.get(captured_piece.symbol(), 0)
+                score += captured_piece_value
+
+                # Evaluate the trade-off
+                if captured_piece_value < moving_piece_value:
+                    score -= moving_piece_value
+
+            # Penalize if the moved piece can be captured next
+            if board.is_attacked_by(not board.turn, move.to_square):
+                score -= moving_piece_value
+
+    board.pop()
+    #print(f"Evaluating move {move}: Score = {score}")
+    return score
+
 
 def minimax_with_alpha_beta(board, depth, alpha, beta, is_maximizing):
+    global transposition_table
+    board_fen = board.fen()
+
+    if board_fen in transposition_table:
+        return transposition_table[board_fen]
+
     if depth == 0 or terminal(board):
-        return evaluate_board(board)
-    
+        return quiescence_search(board, alpha, beta)
+
+    sorted_moves = sort_moves(board)
+
     if is_maximizing:
-        max_eval = float('-inf')
-        for move in sort_moves(board):
+        max_eval = -INFINITY
+        for move in sorted_moves:
             board.push(move)
-            eval = minimax_with_alpha_beta(board, depth - 1, alpha, beta, False)
+            eval = minimax_with_alpha_beta(board, depth - 1, -beta, -alpha, not is_maximizing)
             board.pop()
             max_eval = max(max_eval, eval)
             alpha = max(alpha, eval)
             if beta <= alpha:
-                break  # Beta cut-off
+                break
+        transposition_table[board_fen] = max_eval
         return max_eval
     else:
-        min_eval = float('inf')
-        for move in sort_moves(board):
+        min_eval = INFINITY
+        for move in sorted_moves:
             board.push(move)
-            eval = minimax_with_alpha_beta(board, depth - 1, alpha, beta, True)
+            eval = minimax_with_alpha_beta(board, depth - 1, -beta, -alpha, not is_maximizing)
             board.pop()
             min_eval = min(min_eval, eval)
             beta = min(beta, eval)
             if beta <= alpha:
-                break  # Alpha cut-off
+                break
+        transposition_table[board_fen] = min_eval
         return min_eval
 
-def make_move_with_alpha_beta(board, depth=4):
+def iterative_deepening(board, max_depth):
     best_move = None
-    best_value = float('-inf') if board.turn == chess.WHITE else float('inf')
-    alpha = float('-inf')
-    beta = float('inf')
+    best_value = -INFINITY
+    alpha = -INFINITY
+    beta = INFINITY
 
-    for move in sort_moves(board):
-        board.push(move)
-        move_value = minimax_with_alpha_beta(board, depth - 1, alpha, beta, board.turn == chess.BLACK)
-        board.pop()
-        if board.turn == chess.WHITE:
-            if move_value > best_value:
-                best_value = move_value
+    for depth in range(1, max_depth + 1):
+        for move in sort_moves(board):
+            board.push(move)
+            value = minimax_with_alpha_beta(board, depth - 1, -beta, -alpha, False)
+            board.pop()
+            if value > best_value:
+                best_value = value
                 best_move = move
-            alpha = max(alpha, best_value)
-        else:
-            if move_value < best_value:
-                best_value = move_value
-                best_move = move
-            beta = min(beta, best_value)
-    
+                alpha = max(alpha, value)
+                # print(f"New best move: {best_move} with score {best_value}")
     return best_move
+
+def make_move_with_alpha_beta(board, depth=7):
+    return iterative_deepening(board, depth)
