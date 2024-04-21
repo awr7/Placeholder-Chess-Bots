@@ -6,10 +6,6 @@ import history from '../../assets/img/history.mp4';
 import learn from '../../assets/img/learn.mp4';
 import mainbg from '../../assets/img/deepblue.jpg';
 
-// TODO: Style the menus
-// TODO: Make it smoother
-// TODO: Right now im using a whole bunch of delays to give time for stuff to load, maybe there is a better approach?
-
 const HomePage = () => {
   const [videoSrc, setVideoSrc] = useState('');
   const hoverRef = useRef(null); // Reference for hover timeout
@@ -62,7 +58,12 @@ const HomePage = () => {
               <source src={item} type="video/mp4" />
             </animated.video>
           ) : (
-            <animated.img src={mainbg} alt="Static background" className="video-background" style={style} />
+            <animated.img
+              src={mainbg}
+              alt="Static background"
+              className="video-background background-image"
+              style={style}
+            />
           )
         )}
       </div>
