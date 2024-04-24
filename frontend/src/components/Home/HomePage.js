@@ -1,78 +1,105 @@
 import React, { useState, useRef } from 'react';
-import { useTransition, animated } from 'react-spring';
+import { animated, useSpring } from 'react-spring';
 import './HomePage.css';
 import bgvid from '../../assets/img/background.mp4';
 import history from '../../assets/img/history.mp4';
 import learn from '../../assets/img/learn.mp4';
-import mainbg from '../../assets/img/deepblue.jpg';
+import mainbg from '../../assets/img/deepblue2.jpg';
+import music from '../../assets/audio/MCWAI.wav'; 
 
 const HomePage = () => {
-  const [videoSrc, setVideoSrc] = useState('');
-  const hoverRef = useRef(null); // Reference for hover timeout
-  const leaveTimeoutRef = useRef(null); // Reference for leave timeout to avoid flickering
+  const [hovered, setHovered] = useState(null);
+  const [displayedVideo, setDisplayedVideo] = useState('');
+  const hoverRef = useRef(null);
 
-  // useTransition for the fade in fade out animations
-  const transitions = useTransition(videoSrc, {
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 0 },
-    config: { duration: 1000 },
-    leave: { opacity: 0, delay: 500 }
+  const videoStyles = useSpring({
+    opacity: displayedVideo ? 1 : 0,
+    config: { duration: 500 }
   });
 
-  const handleMouseEnter = (src) => {
-    // Clear any leave timeout to prevent clearing the video when moving between menus
-    if (leaveTimeoutRef.current) {
-      clearTimeout(leaveTimeoutRef.current);
-      leaveTimeoutRef.current = null;
-    }
+  const handleMouseEnter = (item) => {
+    setHovered(item);
 
-    if (hoverRef.current) clearTimeout(hoverRef.current);
-    hoverRef.current = setTimeout(() => {
-      setVideoSrc(src); // Set source after a delay
-    }, 200); // Delay to check if the hover is intentional
+    if (hoverRef.current) {
+      clearTimeout(hoverRef.current);
+    }
+    if (hovered) {
+      // If there was a previous hover, this is a rapid movement
+      hoverRef.current = setTimeout(() => {
+        setDisplayedVideo(item);  // Set video to display after a delay to prevent flicker
+      }, 300);  // Slight delay for rapid movements
+    } else {
+      // No rapid movement, display immediately
+      setDisplayedVideo(item);
+    }
   };
 
   const handleMouseLeave = () => {
-    // Set a timeout on leave, which will be cleared if another hover starts
-    if (hoverRef.current) clearTimeout(hoverRef.current);
-    leaveTimeoutRef.current = setTimeout(() => {
-      setVideoSrc(''); // Clear source only if no other hover has started
-    }, 300); // Longer delay to check if moving to another option
+    setHovered(null);
+    if (hoverRef.current) {
+      clearTimeout(hoverRef.current); 
+    }
+    hoverRef.current = setTimeout(() => {
+      setDisplayedVideo(''); 
+    }, 300);
   };
+
+  const GradientLine = ({ isHalf }) => {
+    const lineStyle = {
+      height: '2px',
+      width: isHalf ? '50%' : '100%',
+      background: 'linear-gradient(to right, rgba(255, 255, 255, 0), #FCFCFC, rgba(255, 255, 255, 0))',
+      margin: '30px auto 0',
+    };
+    return <div style={lineStyle} />;
+  };
+
+  const playMusic = () => {
+    new Audio(music).play()
+  }
 
   return (
     <div className="home-page">
-      <div className="video-container">
-        {transitions((style, item) =>
-          item ? (
-            <animated.video
-              style={style}
-              autoPlay
-              loop
-              muted
-              className="video-background"
-              key={item}
-              onLoadedMetadata={(e) => e.currentTarget.currentTime = 0}  // Reset video to start when loaded
-            >
-              <source src={item} type="video/mp4" />
-            </animated.video>
-          ) : (
-            <animated.img
-              src={mainbg}
-              alt="Static background"
-              className="video-background background-image"
-              style={style}
-            />
-          )
-        )}
+      <button onClick={playMusic}> </button>
+      <div className="video-container" style={{ backgroundColor: 'black' }}>
+        <animated.video style={{ ...videoStyles, display: displayedVideo === 'bgvid' ? 'block' : 'none' }}
+          autoPlay loop muted className="video-background">
+          <source src={bgvid} type="video/mp4" />
+        </animated.video>
+        <animated.video style={{ ...videoStyles, display: displayedVideo === 'learn' ? 'block' : 'none' }}
+          autoPlay loop muted className="video-background">
+          <source src={learn} type="video/mp4" />
+        </animated.video>
+        <animated.video style={{ ...videoStyles, display: displayedVideo === 'history' ? 'block' : 'none' }}
+          autoPlay loop muted className="video-background">
+          <source src={history} type="video/mp4" />
+        </animated.video>
+        <animated.img
+          src={mainbg}
+          alt="Static background"
+          className="video-background background-image"
+          style={{ opacity: displayedVideo ? 0 : 1 }}
+        />
       </div>
-
       <div className="content">
-        <h1>Master Chess with AI</h1>
-        <p onMouseEnter={() => handleMouseEnter(bgvid)} onMouseLeave={handleMouseLeave}>Play against AI</p>
-        <p onMouseEnter={() => handleMouseEnter(learn)} onMouseLeave={handleMouseLeave}>Learn from AI</p>
-        <p onMouseEnter={() => handleMouseEnter(history)} onMouseLeave={handleMouseLeave}>History</p>
+        <div className="title">Master Chess with AI</div>
+        <GradientLine />
+        <div className={`menu-item ${hovered === 'bgvid' ? 'menu-item-hovered' : ''}`}
+          onMouseEnter={() => handleMouseEnter('bgvid')}
+          onMouseLeave={handleMouseLeave}>
+          Play against AI
+        </div>
+        <div className={`menu-item ${hovered === 'learn' ? 'menu-item-hovered' : ''}`}
+          onMouseEnter={() => handleMouseEnter('learn')}
+          onMouseLeave={handleMouseLeave}>
+          Learn from AI
+        </div>
+        <div className={`menu-item ${hovered === 'history' ? 'menu-item-hovered' : ''}`}
+          onMouseEnter={() => handleMouseEnter('history')}
+          onMouseLeave={handleMouseLeave}>
+          History
+        </div>
+        <GradientLine isHalf={true} />
       </div>
     </div>
   );
