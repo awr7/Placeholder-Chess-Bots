@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { animated, useSpring } from 'react-spring';
 import './HomePage.css';
 import bgvid from '../../assets/img/background.mp4';
@@ -10,8 +10,16 @@ import music from '../../assets/audio/MCWAI.wav';
 const HomePage = () => {
   const [hovered, setHovered] = useState(null);
   const [displayedVideo, setDisplayedVideo] = useState('');
+  const [volume, setVolume] = useState(1);
+  const [isPlaying, setisPlaying] = useState(false);
   const hoverRef = useRef(null);
+  const audioRef = useRef(new Audio(music));
 
+  useEffect(() => {
+    audioRef.current.loop = true;
+    audioRef.current.volume = volume;
+  }, [volume]);
+  
   const videoStyles = useSpring({
     opacity: displayedVideo ? 1 : 0,
     config: { duration: 500 }
@@ -55,12 +63,33 @@ const HomePage = () => {
   };
 
   const playMusic = () => {
-    new Audio(music).play()
+    if (audioRef.current.paused) {
+      audioRef.current.play();  
+      setisPlaying(true);
+    } else {
+      audioRef.current.pause();
+      setisPlaying(false);
+    }
+  }
+
+  const handleVolumeChange = (event) => {
+    setVolume(event.target.value);
   }
 
   return (
     <div className="home-page">
-      <button onClick={playMusic}> </button>
+      <button onClick={playMusic}> 
+        {isPlaying ? 'Pause Music' : 'Play Music'}
+      </button>
+      {isPlaying && (
+        <input 
+        type = "range" 
+        min="0" 
+        max="1" 
+        step="0.01" 
+        value={volume} 
+        onChange={handleVolumeChange} />
+      )}
       <div className="video-container" style={{ backgroundColor: 'black' }}>
         <animated.video style={{ ...videoStyles, display: displayedVideo === 'bgvid' ? 'block' : 'none' }}
           autoPlay loop muted className="video-background">
