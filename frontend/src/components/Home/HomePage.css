@@ -79,12 +79,59 @@
     to { opacity: 1; }
   }
 
-@keyframes panEffect {
-  0%, 100% {
-    transform: translateX(0) scale(1.3);
+  @keyframes panEffect {
+    0%, 100% {
+      transform: translateX(0) scale(1.3);
+    }
+    50% {
+      transform: translateX(-9%) scale(1.3);
+    }
   }
-  50% {
-    transform: translateX(-9%) scale(1.3);
-  }
-}
   
+  .algorithm-card {
+    margin-top: 30px;
+    position: relative;
+    width: 25vw; 
+    height: 23vw;  
+    margin-right: 8px; 
+    overflow: hidden;
+    cursor: pointer;
+  }
+  
+  .algorithm-card img {
+    width: 100%;
+    height: 100%;
+    transition: filter 0.3s ease;
+  }
+  
+  .algorithm-card:hover img {
+    filter: none; 
+  }
+  
+  .title-bar {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: 10px 0;
+    background-color: #282828;  
+    color: white;
+    text-align: center;
+    font-size: 32px;
+    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);  
+    backdrop-filter: blur(4px);
+    transition: opacity 0.3s ease;
+    opacity: 0; 
+  }
+  
+  .algorithm-card:hover .overlay {
+    opacity: 0;
+  }
