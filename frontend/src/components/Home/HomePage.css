@@ -33,6 +33,7 @@
     font-size: 96px;
     background: linear-gradient(to bottom, #FFFFFF, #999999); 
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block; 
   }
