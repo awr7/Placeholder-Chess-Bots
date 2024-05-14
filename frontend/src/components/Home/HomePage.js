@@ -7,12 +7,11 @@ import learn from '../../assets/img/learn.mp4';
 import mainbg from '../../assets/img/deepblue2.jpg';
 import cnnImage from '../../assets/img/cnn.png';
 
-const HomePage = () => {
+const HomePage = ({ menuSelected, selectMenu }) => {
   const [hovered, setHovered] = useState(null);
   const [displayedVideo, setDisplayedVideo] = useState('');
   const [isBlurred, setisBlurred] = useState(false);
   const hoverRef = useRef(null);
-  const [menuSelected, setMenuSelected] = useState('');
   const finalMarginTop = '30px';
   const [animateLines, setAnimateLines] = useState(false);
 
@@ -29,12 +28,10 @@ const HomePage = () => {
       clearTimeout(hoverRef.current);
     }
     if (hovered) {
-      // If there was a previous hover, this is a rapid movement
       hoverRef.current = setTimeout(() => {
-        setDisplayedVideo(item);  // Set video to display after a delay to prevent flicker
-      }, 300);  // Slight delay for rapid movements
+        setDisplayedVideo(item);
+      }, 300);
     } else {
-      // No rapid movement, display immediately
       setDisplayedVideo(item);
     }
   };
@@ -42,10 +39,10 @@ const HomePage = () => {
   const handleMouseLeave = () => {
     setHovered(null);
     if (hoverRef.current) {
-      clearTimeout(hoverRef.current); 
+      clearTimeout(hoverRef.current);
     }
     hoverRef.current = setTimeout(() => {
-      setDisplayedVideo(''); 
+      setDisplayedVideo('');
     }, 300);
   };
 
@@ -58,9 +55,9 @@ const HomePage = () => {
       from: { width: '0%', marginTop: '0px' },
       config: { duration: 500 },
       reset: animateLines,
-      immediate: !animateLines  // Ensures animation only plays on change
+      immediate: !animateLines
     });
-  
+
     useEffect(() => {
       if (animateLines) {
         const timeout = setTimeout(() => {
@@ -75,23 +72,35 @@ const HomePage = () => {
       background: 'linear-gradient(to right, rgba(255, 255, 255, 0), #FCFCFC, rgba(255, 255, 255, 0))',
       margin: 'auto',
     };
-  
+
     return <animated.div style={{ ...lineStyle, ...lineAnimation }} />;
   };
 
-  const selectMenu = (menuName) => {
-    if (menuName !== menuSelected) {
-      setMenuSelected(menuName);
-      setAnimateLines(true); 
+  useEffect(() => {
+    setAnimateLines(true);
+
+    if (menuSelected) {
       setisBlurred(true);
+    } else {
+      setisBlurred(false);
     }
-  };
+
+    if (menuSelected === 'Play against AI') {
+      setDisplayedVideo('bgvid');
+    } else if (menuSelected === 'Learn from AI') {
+      setDisplayedVideo('learn');
+    } else if (menuSelected === 'History') {
+      setDisplayedVideo('history');
+    } else {
+      setDisplayedVideo('');
+    }
+  }, [menuSelected]);
 
   const algorithms = [
     { name: "Reinforcement Learning", image: cnnImage },
     { name: "MinMax with Alpha Beta Pruning", image: cnnImage },
     { name: "Other algo", image: cnnImage }
-  ];  
+  ];
 
   return (
     <div className="home-page">
@@ -150,7 +159,7 @@ const HomePage = () => {
           </div>
         )}
         <GradientLine isHalf={true} marginTop={finalMarginTop} />
-      </div>   
+      </div>
     </div>
   );
 };
