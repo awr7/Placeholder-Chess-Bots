@@ -56,26 +56,25 @@ const AudioControls = () => {
   };
 
   return (
-    <div className="audio-controls" style={{ position: 'relative', width: '50px', height: '50px' }}> {/* Adjust width and height as needed */}
-        <div style={{ position: 'absolute', top: 0, width: '100%', zIndex: 10 }} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-            {getVolumeIcon()}
-        </div>
-        {showVolumeControl && (
-            <input 
-                type="range"
-                style={{ position: 'absolute', top: '50px', width: '100px', zIndex: 9 }} // Position the slider right below the icon
-                min="0"
-                max="1"
-                step="0.01"
-                value={volume}
-                onChange={handleVolumeChange}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-            />
-        )}
+    <div className="audio-controls" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '60px', height: '60px', position: 'relative' }}>
+      <div style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10 }} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+          {getVolumeIcon()}
+      </div>
+      {showVolumeControl && (
+          <input 
+              type="range"
+              style={{ position: 'absolute', width: '100px', zIndex: 9, transform: 'translateY(40px) translateX(-100%)', left: '100%' }} 
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={handleVolumeChange}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+          />
+      )}
     </div>
 );
-
 };
 
 export default AudioControls;
