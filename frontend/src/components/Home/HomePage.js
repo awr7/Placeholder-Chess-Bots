@@ -5,23 +5,19 @@ import bgvid from '../../assets/img/background.mp4';
 import history from '../../assets/img/history.mp4';
 import learn from '../../assets/img/learn.mp4';
 import mainbg from '../../assets/img/deepblue2.jpg';
-import music from '../../assets/audio/MCWAI.wav'; 
+import cnnImage from '../../assets/img/cnn.png';
 
-const HomePage = () => {
+const HomePage = ({ menuSelected, selectMenu }) => {
   const [hovered, setHovered] = useState(null);
   const [displayedVideo, setDisplayedVideo] = useState('');
-  const [volume, setVolume] = useState(1);
-  const [isPlaying, setisPlaying] = useState(false);
+  const [isBlurred, setisBlurred] = useState(false);
   const hoverRef = useRef(null);
-  const audioRef = useRef(new Audio(music));
+  const finalMarginTop = '30px';
+  const [animateLines, setAnimateLines] = useState(false);
 
-  useEffect(() => {
-    audioRef.current.loop = true;
-    audioRef.current.volume = volume;
-  }, [volume]);
-  
   const videoStyles = useSpring({
     opacity: displayedVideo ? 1 : 0,
+    filter: isBlurred ? 'blur(8px)' : 'blur(0px)',
     config: { duration: 500 }
   });
 
@@ -32,12 +28,10 @@ const HomePage = () => {
       clearTimeout(hoverRef.current);
     }
     if (hovered) {
-      // If there was a previous hover, this is a rapid movement
       hoverRef.current = setTimeout(() => {
-        setDisplayedVideo(item);  // Set video to display after a delay to prevent flicker
-      }, 300);  // Slight delay for rapid movements
+        setDisplayedVideo(item);
+      }, 300);
     } else {
-      // No rapid movement, display immediately
       setDisplayedVideo(item);
     }
   };
@@ -45,51 +39,71 @@ const HomePage = () => {
   const handleMouseLeave = () => {
     setHovered(null);
     if (hoverRef.current) {
-      clearTimeout(hoverRef.current); 
+      clearTimeout(hoverRef.current);
     }
     hoverRef.current = setTimeout(() => {
-      setDisplayedVideo(''); 
+      setDisplayedVideo('');
     }, 300);
   };
 
-  const GradientLine = ({ isHalf }) => {
+  const GradientLine = ({ isHalf, marginTop }) => {
+    const lineAnimation = useSpring({
+      to: {
+        width: isHalf ? '50%' : '100%',
+        marginTop: marginTop
+      },
+      from: { width: '0%', marginTop: '0px' },
+      config: { duration: 500 },
+      reset: animateLines,
+      immediate: !animateLines
+    });
+
+    useEffect(() => {
+      if (animateLines) {
+        const timeout = setTimeout(() => {
+          setAnimateLines(false);
+        }, 500);
+        return () => clearTimeout(timeout);
+      }
+    }, []);  // Only run on mount and unmount
+        
     const lineStyle = {
       height: '2px',
-      width: isHalf ? '50%' : '100%',
       background: 'linear-gradient(to right, rgba(255, 255, 255, 0), #FCFCFC, rgba(255, 255, 255, 0))',
-      margin: '30px auto 0',
+      margin: 'auto',
     };
-    return <div style={lineStyle} />;
+
+    return <animated.div style={{ ...lineStyle, ...lineAnimation }} />;
   };
 
-  const playMusic = () => {
-    if (audioRef.current.paused) {
-      audioRef.current.play();  
-      setisPlaying(true);
-    } else {
-      audioRef.current.pause();
-      setisPlaying(false);
-    }
-  }
+  useEffect(() => {
+    setAnimateLines(true);
 
-  const handleVolumeChange = (event) => {
-    setVolume(event.target.value);
-  }
+    if (menuSelected) {
+      setisBlurred(true);
+    } else {
+      setisBlurred(false);
+    }
+
+    if (menuSelected === 'Play against AI') {
+      setDisplayedVideo('bgvid');
+    } else if (menuSelected === 'Learn from AI') {
+      setDisplayedVideo('learn');
+    } else if (menuSelected === 'History') {
+      setDisplayedVideo('history');
+    } else {
+      setDisplayedVideo('');
+    }
+  }, [menuSelected]);
+
+  const algorithms = [
+    { name: "Reinforcement Learning", image: cnnImage },
+    { name: "MinMax with Alpha Beta Pruning", image: cnnImage },
+    { name: "Other algo", image: cnnImage }
+  ];
 
   return (
     <div className="home-page">
-      <button onClick={playMusic}> 
-        {isPlaying ? 'Pause Music' : 'Play Music'}
-      </button>
-      {isPlaying && (
-        <input 
-        type = "range" 
-        min="0" 
-        max="1" 
-        step="0.01" 
-        value={volume} 
-        onChange={handleVolumeChange} />
-      )}
       <div className="video-container" style={{ backgroundColor: 'black' }}>
         <animated.video style={{ ...videoStyles, display: displayedVideo === 'bgvid' ? 'block' : 'none' }}
           autoPlay loop muted className="video-background">
@@ -111,24 +125,40 @@ const HomePage = () => {
         />
       </div>
       <div className="content">
-        <div className="title">Master Chess with AI</div>
-        <GradientLine />
-        <div className={`menu-item ${hovered === 'bgvid' ? 'menu-item-hovered' : ''}`}
-          onMouseEnter={() => handleMouseEnter('bgvid')}
-          onMouseLeave={handleMouseLeave}>
-          Play against AI
-        </div>
-        <div className={`menu-item ${hovered === 'learn' ? 'menu-item-hovered' : ''}`}
-          onMouseEnter={() => handleMouseEnter('learn')}
-          onMouseLeave={handleMouseLeave}>
-          Learn from AI
-        </div>
-        <div className={`menu-item ${hovered === 'history' ? 'menu-item-hovered' : ''}`}
-          onMouseEnter={() => handleMouseEnter('history')}
-          onMouseLeave={handleMouseLeave}>
-          History
-        </div>
-        <GradientLine isHalf={true} />
+        <div className="title">{menuSelected ? `${menuSelected}` : "Master Chess with AI"}</div>
+        <GradientLine isHalf={false} marginTop={finalMarginTop} />
+        {!menuSelected ? (
+          <>
+            <div className={`menu-item ${hovered === 'bgvid' ? 'menu-item-hovered' : ''}`}
+              onMouseEnter={() => handleMouseEnter('bgvid')}
+              onMouseLeave={handleMouseLeave}
+              onClick={() => selectMenu('Play against AI')}>
+              Play against AI
+            </div>
+            <div className={`menu-item ${hovered === 'learn' ? 'menu-item-hovered' : ''}`}
+              onMouseEnter={() => handleMouseEnter('learn')}
+              onMouseLeave={handleMouseLeave}
+              onClick={() => selectMenu('Learn from AI')}>
+              Learn from AI
+            </div>
+            <div className={`menu-item ${hovered === 'history' ? 'menu-item-hovered' : ''}`}
+              onMouseEnter={() => handleMouseEnter('history')}
+              onMouseLeave={handleMouseLeave}>
+              History
+            </div>
+          </>
+        ) : (
+          <div className="algorithm-menu" style={{ display: 'flex', overflowX: 'auto' }}>
+            {algorithms.map((algo, index) => (
+              <div key={index} className="algorithm-card" onMouseEnter={() => setHovered(algo.name)} onMouseLeave={() => setHovered('')}>
+                <img src={algo.image} alt={algo.name} style={{ filter: hovered === algo.name ? 'none' : 'grayscale(100%) blur(2px)' }} />
+                <div className="overlay"></div>
+                <div className="title-bar">{algo.name}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        <GradientLine isHalf={true} marginTop={finalMarginTop} />
       </div>
     </div>
   );
