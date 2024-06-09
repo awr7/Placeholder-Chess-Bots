@@ -30,38 +30,48 @@ class ChessGame:
         while not self.chess_board.board.is_game_over():
             start_time = time.time()
             current_player = 'White' if self.chess_board.board.turn == chess.WHITE else 'Black'
-            bot_name = white_bot_name if current_player == 'White' else black_bot_name
-            move = white_bot(self.chess_board.board) if current_player == 'White' else black_bot(self.chess_board.board)
+
+            if (current_player == 'White' and white_bot is None) or (current_player == 'Black' and black_bot is None):
+                move = self.human_move()
+            else:
+                move = white_bot(self.chess_board.board) if current_player == 'White' else black_bot(self.chess_board.board)
 
             if move:
                 end_time = time.time()
                 elapsed_time = end_time - start_time
-                # Update remaining time based on current player
-                if current_player == 'White':
+
+                if current_player == 'White' and white_bot is not None:
                     self.white_time_left -= elapsed_time
                     if self.white_time_left <= 0:
-                        break  # White ran out of time
-                else:
+                        break
+                elif current_player == 'Black' and black_bot is not None:
                     self.black_time_left -= elapsed_time
                     if self.black_time_left <= 0:
-                        break  # Black ran out of time
+                        break
 
-                # Check for capture
                 if self.chess_board.board.is_capture(move):
                     captured_piece = self.chess_board.board.piece_at(move.to_square)
-                    self.captures.append(f"{bot_name} captured {captured_piece} on move {move_count + 1}.")
-               # print(f"{current_player} ({bot_name}) moved: {move}")
-                print(f"{move}")
+                    capture_message = f"{current_player} captured {captured_piece.symbol().upper()} on move {move_count + 1}." if captured_piece else f"{current_player} made an en passant capture on move {move_count + 1}."
+                    self.captures.append(capture_message)
+
+                print(f"{current_player} moved: {move}")
                 self.chess_board.make_move(move.uci())
                 move_count += 1
             else:
-                print(f"{current_player} bot failed to make a move.")
+                print(f"{current_player} failed to make a move.")
                 break
 
         game_result, reason = self.get_game_result()
         self.game_results.append((white_bot_name, black_bot_name, game_result, reason, move_count, self.captures))
 
-
+    def human_move(self):
+        legal_moves = [self.chess_board.board.san(move) for move in self.chess_board.board.legal_moves]
+        print("Legal moves are:", ', '.join(legal_moves))
+        move = input("Your move: ")
+        while move not in legal_moves:
+            print("Invalid move. Legal moves are:", ', '.join(legal_moves))
+            move = input("Your move: ")
+        return self.chess_board.board.parse_san(move)
 
     def get_game_result(self):
         if self.chess_board.board.is_checkmate():
@@ -116,14 +126,14 @@ class ChessGame:
 
 if __name__ == "__main__":
     game = ChessGame()
-    games_to_play = 3
-    for i in range(games_to_play):
-        if i % 2 == 0:
-            game.play_game(alpha_beta_move, random_move, "Alpha-Beta Bot", "Random bot")
-            print("")
-            print(f"---END OF GAME {i+1}----")
+    player_choice = input("Do you want to play? (y/n): ")
+    if player_choice.lower() == 'y':
+        player_color = input("Choose your color (White/Black): ").capitalize()
+        if player_color == 'White':
+            game.play_game(None, alpha_beta_move, "Human", "Alpha-Beta Bot")
         else:
-            game.play_game(random_move, alpha_beta_move, "Random Bot", "Alpha-Beta Bot")
-            print("")
-            print(f"---END OF GAME {i+1}----")
+            game.play_game(alpha_beta_move, None, "Alpha-Beta Bot", "Human")
+    else:
+        game.play_game(alpha_beta_move, minimax_move, "Alpha-Beta Bot", "MinMax bot")
+
     game.display_results_summary()

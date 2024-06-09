@@ -3,7 +3,10 @@ import chess
 
 CHECKMATE_SCORE = 1000000
 INFINITY = float('inf')
+
+#Data structures for bot's memory
 transposition_table = {}
+quiet_move_history = {}
 
 piece_square_tables = {
     'P':[
@@ -85,7 +88,6 @@ def get_piece_square_score(piece, square):
     index = square if is_white else 63 - square
     return table[index]
 
-
 def evaluate_board(board):
     if board.is_checkmate():
         return -CHECKMATE_SCORE if board.turn else CHECKMATE_SCORE
@@ -111,8 +113,6 @@ def evaluate_board(board):
 
     return score
 
-
-
 def quiescence_search(board, alpha, beta):
     stand_pat = evaluate_board(board)
     if stand_pat >= beta:
@@ -135,94 +135,138 @@ def quiescence_search(board, alpha, beta):
 
 def sort_moves(board):
     legal_moves = list(board.legal_moves)
-    return sorted(legal_moves, key=lambda move: evaluate_move(board, move), reverse=board.turn)
+    return sorted(legal_moves, key=lambda move: evaluate_move(board, move) + quiet_move_history.get(move, 0), reverse=board.turn)
 
 def evaluate_move(board, move):
     score = 0
 
     board.push(move)
 
-    # Immediate checkmate check
-    if board.is_checkmate():
-        score += CHECKMATE_SCORE
-    else:
-        moving_piece = board.piece_at(move.from_square)
-        captured_piece = board.piece_at(move.to_square)
-        
-        if moving_piece:
-            score += get_piece_square_score(moving_piece, move.to_square)
-            moving_piece_value = piece_values.get(moving_piece.symbol(), 0)
+    moving_piece = board.piece_at(move.from_square)
+    captured_piece = board.piece_at(move.to_square)
 
-            if captured_piece:
-                captured_piece_value = piece_values.get(captured_piece.symbol(), 0)
-                score += captured_piece_value
+    if moving_piece:
+        moving_piece_value = piece_values.get(moving_piece.symbol(), 0)
+        score += get_piece_square_score(moving_piece, move.to_square)
 
-                # Evaluate the trade-off
-                if captured_piece_value < moving_piece_value:
-                    score -= moving_piece_value
-
-            # Penalize if the moved piece can be captured next
-            if board.is_attacked_by(not board.turn, move.to_square):
+        if captured_piece:
+            captured_piece_value = piece_values.get(captured_piece.symbol(), 0)
+            score += captured_piece_value
+            if captured_piece_value <= moving_piece_value:
                 score -= moving_piece_value
 
-    board.pop()
-    #print(f"Evaluating move {move}: Score = {score}")
-    return score
+        # Check for checkmate and assign score appropriately
+        if board.is_checkmate():
+            score += CHECKMATE_SCORE if board.turn != moving_piece.color else -CHECKMATE_SCORE
+            print(f"Checkmate detected with move: {board.uci(move)}")
+        elif board.is_repetition(3):
+            score -= 500
 
+        # Evaluate potential threats to the king after the move
+        king_square = board.king(moving_piece.color)
+        if king_square is not None:
+            attackers = board.attackers(not moving_piece.color, king_square)
+            if attackers:
+                score -= 100 * len(attackers)  # Penalize moves that leave the king in danger
+
+        # Evaluate opponent's potential attacks after the move
+        opponent_color = not board.turn
+        for piece_type in chess.PIECE_TYPES:
+            for piece_square in board.pieces(piece_type=piece_type, color=opponent_color):
+                attacked_piece = board.piece_at(piece_square)
+                if attacked_piece:
+                    attackers = board.attackers(board.turn, piece_square)
+                    if attackers:
+                        attacked_piece_value = piece_values.get(attacked_piece.symbol(), 0)
+                        score -= attacked_piece_value * len(attackers)
+
+    board.pop()
+    return score
 
 def minimax_with_alpha_beta(board, depth, alpha, beta, is_maximizing):
     global transposition_table
-    board_fen = board.fen()
 
-    if board_fen in transposition_table:
-        return transposition_table[board_fen]
+    board_fen = board.fen()
+    #print(f"Visiting node: {board_fen} at depth {depth} with alpha={alpha} beta={beta}")
 
     if depth == 0 or terminal(board):
-        return quiescence_search(board, alpha, beta)
+        score = quiescence_search(board, alpha, beta)
+        return score
 
-    sorted_moves = sort_moves(board)
+    if board_fen in transposition_table:
+        entry = transposition_table[board_fen]
+     #   print(f"Transposition table hit for {board_fen} at depth {depth}")
+        if entry['depth'] >= depth:
+            stored_score = entry['score']
+            if entry['flag'] == 'exact':
+      #          print(f"Returning exact score {stored_score} from table")
+                return stored_score
+            elif entry['flag'] == 'lower':
+                alpha = max(alpha, stored_score)
+            elif entry['flag'] == 'upper':
+                beta = min(beta, stored_score)
+            if alpha >= beta:
+       #         print(f"Pruning with alpha {alpha} >= beta {beta}")
+                return stored_score
 
     if is_maximizing:
-        max_eval = -INFINITY
-        for move in sorted_moves:
+        max_eval = -float('inf')
+        for move in sort_moves(board):
             board.push(move)
-            eval = minimax_with_alpha_beta(board, depth - 1, -beta, -alpha, not is_maximizing)
+            eval = minimax_with_alpha_beta(board, depth - 1, alpha, beta, False)
             board.pop()
             max_eval = max(max_eval, eval)
             alpha = max(alpha, eval)
             if beta <= alpha:
                 break
-        transposition_table[board_fen] = max_eval
+        flag = 'exact' if alpha >= max_eval else 'lower'
+        if board_fen not in transposition_table or transposition_table[board_fen]['depth'] < depth:
+            transposition_table[board_fen] = {'score': max_eval, 'depth': depth, 'flag': flag}
         return max_eval
     else:
-        min_eval = INFINITY
-        for move in sorted_moves:
+        min_eval = float('inf')
+        for move in sort_moves(board):
             board.push(move)
-            eval = minimax_with_alpha_beta(board, depth - 1, -beta, -alpha, not is_maximizing)
+            eval = minimax_with_alpha_beta(board, depth - 1, alpha, beta, True)
             board.pop()
             min_eval = min(min_eval, eval)
             beta = min(beta, eval)
             if beta <= alpha:
                 break
-        transposition_table[board_fen] = min_eval
+        flag = 'exact' if beta <= min_eval else 'upper'
+        if board_fen not in transposition_table or transposition_table[board_fen]['depth'] < depth:
+            transposition_table[board_fen] = {'score': min_eval, 'depth': depth, 'flag': flag}
         return min_eval
+
 
 def iterative_deepening(board, max_depth):
     best_move = None
     best_value = -INFINITY
     alpha = -INFINITY
     beta = INFINITY
+    move_history = []
+
+    for move in board.move_stack:
+        move_history.append(board.uci(move))
 
     for depth in range(1, max_depth + 1):
         for move in sort_moves(board):
             board.push(move)
+            current_move = board.uci(move)
+            if current_move in move_history[-8:]:
+                board.pop()
+                continue
+
             value = minimax_with_alpha_beta(board, depth - 1, -beta, -alpha, False)
             board.pop()
+            
             if value > best_value:
                 best_value = value
                 best_move = move
                 alpha = max(alpha, value)
                 # print(f"New best move: {best_move} with score {best_value}")
+            move_history.append(current_move)
+
     return best_move
 
 def make_move_with_alpha_beta(board, depth=7):

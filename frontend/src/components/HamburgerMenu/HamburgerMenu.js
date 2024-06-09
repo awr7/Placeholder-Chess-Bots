@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './HamburgerMenu.css';
 import { useNavigate } from 'react-router-dom';
 
-const HamburgerMenu = ({ selectMenu }) => {
+    const HamburgerMenu = ({ selectMenu }) => {
     const [isActive, setIsActive] = useState(false);
     const navigate = useNavigate();
 
