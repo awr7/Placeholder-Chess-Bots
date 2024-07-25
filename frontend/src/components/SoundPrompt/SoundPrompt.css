@@ -1,0 +1,60 @@
+.sound-prompt {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1002;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px;
+  color: #D6D6D6;
+}
+
+.prompt-message {
+  margin-bottom: 20px;
+}
+
+.prompt-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 100px;
+  cursor: pointer;
+}
+
+.menu-item {
+  text-align: center;
+  min-width: 300px;
+  transition: color 0.3s ease;
+}
+
+.menu-item-hovered {
+  cursor: pointer;
+  color: #FFFFFF;
+}
+
+.gradient-line-jr {
+  width: 25%;
+  height: 2px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), #FCFCFC, rgba(255, 255, 255, 0));
+  margin: 10px 0;
+}
+
+.content-hidden .content {
+  display: none;
+}
+
+.content-hidden .audio-controls {
+  cursor: default !important;
+}
+
+.content-visible .content {
+  display: block;
+}
+
+.content-visible .audio-controls {
+  cursor: pointer;
+}

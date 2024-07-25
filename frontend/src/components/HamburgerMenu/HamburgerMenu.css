@@ -122,5 +122,5 @@
   }
   
   .menu-active .content {
-      display: none;
+      display: none !important;
   }

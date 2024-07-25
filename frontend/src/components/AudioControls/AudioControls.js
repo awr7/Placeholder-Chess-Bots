@@ -4,18 +4,19 @@ import MutedIcon from '../../assets/icons/muted.svg';
 import LowVolumeIcon from '../../assets/icons/low.svg';
 import MediumVolumeIcon from '../../assets/icons/medium.svg';
 import HighVolumeIcon from '../../assets/icons/high.svg';
+import SoundPrompt from '../SoundPrompt/SoundPrompt';
 
-const AudioControls = () => {
-  const [volume, setVolume] = useState(0.5);
+const AudioControls = ({ onSoundPreferenceSet }) => {
+  const [volume, setVolume] = useState(0);
   const [lastVolume, setLastVolume] = useState(0.5);
   const [showVolumeControl, setShowVolumeControl] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(true);
   const hideVolumeTimeout = useRef(null);
   const audioRef = useRef(new Audio(music));
 
   useEffect(() => {
     audioRef.current.loop = true;
     audioRef.current.volume = volume;
-    audioRef.current.play().catch(error => console.log('Auto-play was prevented: ', error));
   }, [volume]);
 
   const handleVolumeChange = (event) => {
@@ -55,15 +56,29 @@ const AudioControls = () => {
     }
   };
 
+  const handleAccept = () => {
+    setVolume(0.5);
+    audioRef.current.play().catch(error => console.log('Auto-play was prevented: ', error));
+    setShowPrompt(false);
+    onSoundPreferenceSet();
+  };
+
+  const handleDeny = () => {
+    setVolume(0);
+    setShowPrompt(false);
+    onSoundPreferenceSet();
+  };
+
   return (
     <div className="audio-controls" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '60px', height: '60px', position: 'relative', cursor: 'pointer', zIndex: 1001 }}>
+      {showPrompt && <SoundPrompt onAccept={handleAccept} onDeny={handleDeny} />}
       <div style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1001, cursor: 'pointer' }} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           {getVolumeIcon()}
       </div>
       {showVolumeControl && (
           <input 
               type="range"
-              style={{ position: 'absolute', width: '100px', zIndex: 1001, transform: 'translateY(40px) translateX(-100%)', left: '100%', cursor: 'pointer' }} 
+              style={{ position: 'absolute', width: '100px', zIndex: 1001, transform: 'translateY(40px) translateX(-100%)', left: '100%', cursor: 'pointer', accentColor: '#666666' }} 
               min="0"
               max="1"
               step="0.01"
