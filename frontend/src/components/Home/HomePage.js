@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { animated, useSpring } from 'react-spring';
 import './HomePage.css';
-import bgvid from '../../assets/img/background.mp4';
-import history from '../../assets/img/history.mp4';
-import learn from '../../assets/img/learn.mp4';
-import mainbg from '../../assets/img/deepblue2.jpg';
+import playBackgroundVideo from '../../assets/img/playBackground.mp4';
+import historyBackgroundVideo from '../../assets/img/historyBackground.mp4';
+import learnBackgroundVideo from '../../assets/img/learnBackground.mp4';
+import mainbg from '../../assets/img/background.jpg';
 import cnnImage from '../../assets/img/cnn.png';
 
 const HomePage = ({ menuSelected, selectMenu }) => {
@@ -86,11 +86,11 @@ const HomePage = ({ menuSelected, selectMenu }) => {
     }
 
     if (menuSelected === 'Play against AI') {
-      setDisplayedVideo('bgvid');
+      setDisplayedVideo('playBackgroundVideo');
     } else if (menuSelected === 'Learn from AI') {
-      setDisplayedVideo('learn');
+      setDisplayedVideo('learnBackgroundVideo');
     } else if (menuSelected === 'History') {
-      setDisplayedVideo('history');
+      setDisplayedVideo('historyBackgroundVideo');
     } else {
       setDisplayedVideo('');
     }
@@ -105,17 +105,17 @@ const HomePage = ({ menuSelected, selectMenu }) => {
   return (
     <div className="home-page">
       <div className="video-container" style={{ backgroundColor: 'black' }}>
-        <animated.video style={{ ...videoStyles, display: displayedVideo === 'bgvid' ? 'block' : 'none' }}
+        <animated.video style={{ ...videoStyles, display: displayedVideo === 'playBackgroundVideo' ? 'block' : 'none' }}
           autoPlay loop muted className="video-background">
-          <source src={bgvid} type="video/mp4" />
+          <source src={playBackgroundVideo} type="video/mp4" />
         </animated.video>
-        <animated.video style={{ ...videoStyles, display: displayedVideo === 'learn' ? 'block' : 'none' }}
+        <animated.video style={{ ...videoStyles, display: displayedVideo === 'learnBackgroundVideo' ? 'block' : 'none' }}
           autoPlay loop muted className="video-background">
-          <source src={learn} type="video/mp4" />
+          <source src={learnBackgroundVideo} type="video/mp4" />
         </animated.video>
-        <animated.video style={{ ...videoStyles, display: displayedVideo === 'history' ? 'block' : 'none' }}
+        <animated.video style={{ ...videoStyles, display: displayedVideo === 'historyBackgroundVideo' ? 'block' : 'none' }}
           autoPlay loop muted className="video-background">
-          <source src={history} type="video/mp4" />
+          <source src={historyBackgroundVideo} type="video/mp4" />
         </animated.video>
         <animated.img
           src={mainbg}
@@ -129,20 +129,20 @@ const HomePage = ({ menuSelected, selectMenu }) => {
         <GradientLine isHalf={false} marginTop={finalMarginTop} />
         {!menuSelected ? (
           <>
-            <div className={`menu-item ${hovered === 'bgvid' ? 'menu-item-hovered' : ''}`}
-              onMouseEnter={() => handleMouseEnter('bgvid')}
+            <div className={`menu-item ${hovered === 'playBackgroundVideo' ? 'menu-item-hovered' : ''}`}
+              onMouseEnter={() => handleMouseEnter('playBackgroundVideo')}
               onMouseLeave={handleMouseLeave}
               onClick={() => selectMenu('Play against AI')}>
               Play against AI
             </div>
-            <div className={`menu-item ${hovered === 'learn' ? 'menu-item-hovered' : ''}`}
-              onMouseEnter={() => handleMouseEnter('learn')}
+            <div className={`menu-item ${hovered === 'learnBackgroundVideo' ? 'menu-item-hovered' : ''}`}
+              onMouseEnter={() => handleMouseEnter('learnBackgroundVideo')}
               onMouseLeave={handleMouseLeave}
               onClick={() => selectMenu('Learn from AI')}>
               Learn from AI
             </div>
-            <div className={`menu-item ${hovered === 'history' ? 'menu-item-hovered' : ''}`}
-              onMouseEnter={() => handleMouseEnter('history')}
+            <div className={`menu-item ${hovered === 'historyBackgroundVideo' ? 'menu-item-hovered' : ''}`}
+              onMouseEnter={() => handleMouseEnter('historyBackgroundVideo')}
               onMouseLeave={handleMouseLeave}>
               History
             </div>
