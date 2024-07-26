@@ -13,7 +13,7 @@ const HomePage = ({ menuSelected, selectMenu }) => {
   const [isBlurred, setisBlurred] = useState(false);
   const hoverRef = useRef(null);
   const finalMarginTop = '30px';
-  const [animateLines, setAnimateLines] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
 
   const videoStyles = useSpring({
     opacity: displayedVideo ? 1 : 0,
@@ -46,39 +46,12 @@ const HomePage = ({ menuSelected, selectMenu }) => {
     }, 300);
   };
 
-  const GradientLine = ({ isHalf, marginTop }) => {
-    const lineAnimation = useSpring({
-      to: {
-        width: isHalf ? '50%' : '100%',
-        marginTop: marginTop
-      },
-      from: { width: '0%', marginTop: '0px' },
-      config: { duration: 500 },
-      reset: animateLines,
-      immediate: !animateLines
-    });
-
-    useEffect(() => {
-      if (animateLines) {
-        const timeout = setTimeout(() => {
-          setAnimateLines(false);
-        }, 500);
-        return () => clearTimeout(timeout);
-      }
-    }, []);  // Only run on mount and unmount
-        
-    const lineStyle = {
-      height: '2px',
-      background: 'linear-gradient(to right, rgba(255, 255, 255, 0), #FCFCFC, rgba(255, 255, 255, 0))',
-      margin: 'auto',
-    };
-
-    return <animated.div style={{ ...lineStyle, ...lineAnimation }} />;
+  const handleMenuClick = (menu) => {
+    selectMenu(menu);
+    setAnimationKey(prevKey => prevKey + 1); // change the key to force re-render and restart animation
   };
 
   useEffect(() => {
-    setAnimateLines(true);
-
     if (menuSelected) {
       setisBlurred(true);
     } else {
@@ -126,19 +99,19 @@ const HomePage = ({ menuSelected, selectMenu }) => {
       </div>
       <div className="content">
         <div className="title">{menuSelected ? `${menuSelected}` : "Master Chess with AI"}</div>
-        <GradientLine isHalf={false} marginTop={finalMarginTop} />
+        <ExpandingLine key={animationKey} isHalf={false} marginTop={finalMarginTop} />
         {!menuSelected ? (
           <>
             <div className={`menu-item ${hovered === 'playBackgroundVideo' ? 'menu-item-hovered' : ''}`}
               onMouseEnter={() => handleMouseEnter('playBackgroundVideo')}
               onMouseLeave={handleMouseLeave}
-              onClick={() => selectMenu('Play against AI')}>
+              onClick={() => handleMenuClick('Play against AI')}>
               Play against AI
             </div>
             <div className={`menu-item ${hovered === 'learnBackgroundVideo' ? 'menu-item-hovered' : ''}`}
               onMouseEnter={() => handleMouseEnter('learnBackgroundVideo')}
               onMouseLeave={handleMouseLeave}
-              onClick={() => selectMenu('Learn from AI')}>
+              onClick={() => handleMenuClick('Learn from AI')}>
               Learn from AI
             </div>
             <div className={`menu-item ${hovered === 'historyBackgroundVideo' ? 'menu-item-hovered' : ''}`}
@@ -158,9 +131,15 @@ const HomePage = ({ menuSelected, selectMenu }) => {
             ))}
           </div>
         )}
-        <GradientLine isHalf={true} marginTop={finalMarginTop} />
+        <ExpandingLine key={`${animationKey}-half`} isHalf={true} marginTop={finalMarginTop} />
       </div>
     </div>
+  );
+};
+
+const ExpandingLine = ({ isHalf, marginTop }) => {
+  return (
+    <div className={`expanding-line ${isHalf ? 'half' : 'full'}`} style={{ marginTop: marginTop }} />
   );
 };
 
