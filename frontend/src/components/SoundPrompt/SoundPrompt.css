@@ -14,8 +14,17 @@
   color: #D6D6D6;
 }
 
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
 .prompt-message {
   margin-bottom: 20px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: typing 2s steps(40, end);
 }
 
 .prompt-buttons {
@@ -23,6 +32,12 @@
   flex-direction: row;
   gap: 100px;
   cursor: pointer;
+  animation: fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .menu-item {
