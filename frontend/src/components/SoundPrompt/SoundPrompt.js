@@ -8,8 +8,12 @@ const SoundPrompt = ({ onAccept, onDeny }) => {
     <div className="sound-prompt">
       <div className="title">Master Chess with AI</div>
       <div className="gradient-line"></div>
-      <div className="prompt-message">This website is best experienced with music. Would you like the sound on?</div>
-      <div className="prompt-buttons">
+      <div class="prompt-message-container">
+        <div class="prompt-message">
+          <span class="typing-text">This website is best experienced with music. Would you like the sound on?</span>
+        </div>
+      </div>
+      <div class="prompt-buttons">
         <div
           className={`menu-item ${hovered === 'accept' ? 'menu-item-hovered' : ''}`}
           onMouseEnter={() => setHovered('accept')}
