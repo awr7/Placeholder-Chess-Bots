@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './components/Home/HomePage';
 import HamburgerMenu from './components/HamburgerMenu/HamburgerMenu';
 import AudioControls from './components/AudioControls/AudioControls';
+import Play from './components/Play/Play';
 import { useState } from 'react';
 
 const App = () => {
@@ -26,6 +27,7 @@ const App = () => {
       </div>
       <Routes>
         <Route path="/" element={<HomePage menuSelected={menuSelected} selectMenu={selectMenu} />} />
+        <Route path="/play" element={<Play />} />
       </Routes>
       </div>
     </Router>

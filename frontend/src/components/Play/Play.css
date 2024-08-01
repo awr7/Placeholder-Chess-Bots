@@ -1,0 +1,10 @@
+.play-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.play-background {
+    animation: panEffect 40s ease-in-out infinite; 
+  }
