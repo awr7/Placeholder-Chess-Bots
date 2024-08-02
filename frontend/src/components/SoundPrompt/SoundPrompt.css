@@ -24,7 +24,7 @@
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
-  animation: typing 2s steps(40, end);
+  animation: fadeIn 1s ease-in;
 }
 
 .prompt-buttons {
@@ -32,7 +32,6 @@
   flex-direction: row;
   gap: 100px;
   cursor: pointer;
-  animation: fadeIn 1s ease-in;
 }
 
 @keyframes fadeIn {
