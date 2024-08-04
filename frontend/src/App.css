@@ -1,5 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&display=swap');
 
+@font-face {
+  font-family: 'Exodus Sans';
+  src: url(./assets/fonts/EudoxusSans-Regular-BF659b6cb1d4714.ttf);
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Exodus Sans';
+  src: url(./assets/fonts/EudoxusSans-ExtraBold-BF659b6cb1b96c9.ttf);
+  font-weight: bolder;
+  font-style: normal;
+}
+
 .App {
   text-align: center;
 }

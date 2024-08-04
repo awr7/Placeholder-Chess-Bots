@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { animated, useSpring } from 'react-spring';
+import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 import playBackgroundVideo from '../../assets/img/playBackground.mp4';
 import historyBackgroundVideo from '../../assets/img/historyBackground.mp4';
@@ -14,6 +15,7 @@ const HomePage = ({ menuSelected, selectMenu }) => {
   const hoverRef = useRef(null);
   const finalMarginTop = '30px';
   const [animationKey, setAnimationKey] = useState(0);
+  const navigate = useNavigate();
 
   const videoStyles = useSpring({
     opacity: displayedVideo ? 1 : 0,
@@ -50,6 +52,11 @@ const HomePage = ({ menuSelected, selectMenu }) => {
     selectMenu(menu);
     setAnimationKey(prevKey => prevKey + 1); // change the key to force re-render and restart animation
   };
+
+  const handleCardClick = () => {
+    navigate('/play');
+  };
+
 
   useEffect(() => {
     if (menuSelected) {
@@ -123,7 +130,7 @@ const HomePage = ({ menuSelected, selectMenu }) => {
         ) : (
           <div className="algorithm-menu" style={{ display: 'flex', overflowX: 'auto' }}>
             {algorithms.map((algo, index) => (
-              <div key={index} className="algorithm-card" onMouseEnter={() => setHovered(algo.name)} onMouseLeave={() => setHovered('')}>
+              <div key={index} className="algorithm-card" onMouseEnter={() => setHovered(algo.name)} onMouseLeave={() => setHovered('')} onClick={handleCardClick}>
                 <img src={algo.image} alt={algo.name} style={{ filter: hovered === algo.name ? 'none' : 'grayscale(100%) blur(2px)' }} />
                 <div className="overlay"></div>
                 <div className="title-bar">{algo.name}</div>
