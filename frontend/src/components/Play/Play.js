@@ -9,6 +9,7 @@ const Play = () => {
   const [game, setGame] = useState(new Chess());
   const [highlightSquares, setHighlightSquares] = useState([]);
   const [animationKey, setAnimationKey] = useState(0);
+  const [flashSquare, setFlashSquare] = useState(null);
   const finalMarginTop = "30px";
 
   const videoStyles = useSpring({
@@ -17,16 +18,31 @@ const Play = () => {
     config: { duration: 500 },
   });
 
-  const onDrop = ({ sourceSquare, targetSquare }) => {
-    const move = game.move({
-      from: sourceSquare,
-      to: targetSquare,
-      promotion: "q",
-    });
+  const flashSquareTwice = (square) => {
+    setFlashSquare(square);
+    setTimeout(() => setFlashSquare(null), 250);
+    setTimeout(() => setFlashSquare(square), 500);
+    setTimeout(() => setFlashSquare(null), 750);
+  };
 
-    if (move === null) return;
-    setGame(new Chess(game.fen()));
-    setHighlightSquares([]);
+  const onDrop = ({ sourceSquare, targetSquare }) => {
+    try {
+      const move = game.move({
+        from: sourceSquare,
+        to: targetSquare,
+        promotion: "q",
+      });
+
+      if (move === null) {
+        throw new Error("Invalid move");
+      }
+
+      setGame(new Chess(game.fen()));
+      setHighlightSquares([]);
+    } catch (error) {
+      console.error(error);
+      flashSquareTwice(sourceSquare);
+    }
   };
 
   const onSquareClick = (square) => {
@@ -51,6 +67,10 @@ const Play = () => {
     a[c] = { backgroundColor: "rgba(255, 255, 0, 0.4)" };
     return a;
   }, {});
+
+  if (flashSquare) {
+    squareStyles[flashSquare] = { backgroundColor: "rgba(255, 0, 0, 0.4)" };
+  }
 
   useEffect(() => {
     setAnimationKey((prevKey) => prevKey + 1);
