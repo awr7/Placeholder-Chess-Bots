@@ -14,6 +14,7 @@ const HomePage = ({ menuSelected, selectMenu }) => {
   const hoverRef = useRef(null);
   const finalMarginTop = "30px";
   const [animationKey, setAnimationKey] = useState(0);
+  const navigate = useNavigate();
 
   const videoStyles = useSpring({
     opacity: displayedVideo ? 1 : 0,
@@ -50,6 +51,11 @@ const HomePage = ({ menuSelected, selectMenu }) => {
     selectMenu(menu);
     setAnimationKey((prevKey) => prevKey + 1); // change the key to force re-render and restart animation
   };
+
+  const handleCardClick = () => {
+    navigate('/play');
+  };
+
 
   useEffect(() => {
     if (menuSelected) {
