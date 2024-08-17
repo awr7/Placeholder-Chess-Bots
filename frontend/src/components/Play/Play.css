@@ -47,16 +47,21 @@
 }
 
 .play-gradient-line {
-    width: 90%;
-    height: 2px;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0), #FCFCFC, rgba(255, 255, 255, 0));
-    margin: 10px 0;
+  width: 90%;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0),
+    #fcfcfc,
+    rgba(255, 255, 255, 0)
+  );
+  margin: 10px 0;
 }
 
 .move-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
   background: linear-gradient(
     -32deg,
     rgba(255, 255, 255, 0.5) 0%,
@@ -66,6 +71,29 @@
   height: 70%;
   border-radius: 9px;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.move-list {
+  display: grid;
+  grid-template-columns: 30px 1fr 1fr;
+  gap: 10px;
+  font-size: 24px;
+  color: white;
+}
+
+.move-row {
+  display: contents;
+}
+
+.move-number {
+  font-weight: bold;
+}
+
+.white-move,
+.black-move {
+  text-align: center;
 }
 
 .play-menu-buttons {

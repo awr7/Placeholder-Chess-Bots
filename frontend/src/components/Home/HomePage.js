@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { animated, useSpring } from "react-spring";
 import "./HomePage.css";
 import playBackgroundVideo from "../../assets/img/playBackground.mp4";
@@ -53,9 +54,8 @@ const HomePage = ({ menuSelected, selectMenu }) => {
   };
 
   const handleCardClick = () => {
-    navigate('/play');
+    navigate("/play");
   };
-
 
   useEffect(() => {
     if (menuSelected) {
@@ -182,6 +182,7 @@ const HomePage = ({ menuSelected, selectMenu }) => {
                 className="algorithm-card"
                 onMouseEnter={() => setHovered(algo.name)}
                 onMouseLeave={() => setHovered("")}
+                onClick={handleCardClick}
               >
                 <img
                   src={algo.image}
