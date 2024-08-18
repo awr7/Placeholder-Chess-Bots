@@ -26,7 +26,7 @@
 .prompt-message {
   margin-bottom: 20px;
   line-height: 1.2;
-  white-space: nowrap;
+  text-align: center;
   overflow: hidden;
   animation: fadeIn 1s ease-in;
 }
@@ -84,4 +84,37 @@
 
 .content-visible .audio-controls {
   cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .title {
+    font-size: 72px;
+  }
+
+  .sound-prompt {
+    font-size: 24px;
+  }
+
+  .prompt-buttons {
+    gap: 50px;
+  }
+}
+
+@media (max-width: 680px) {
+  .title {
+    font-size: 3rem;
+    text-align: center;
+  }
+
+  .sound-prompt {
+    font-size: 1.4rem;
+  }
+
+  .prompt-buttons {
+    gap: 0px;
+  }
+
+  .menu-item {
+    min-width: 150px;
+  }
 }
