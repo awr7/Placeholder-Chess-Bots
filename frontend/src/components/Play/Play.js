@@ -37,7 +37,7 @@ const Play = () => {
         throw new Error("Invalid move");
       }
 
-      setGame(new Chess(game.fen()));
+      setGame(game);
       setHighlightSquares([]);
     } catch (error) {
       console.error(error);
@@ -111,11 +111,23 @@ const Play = () => {
             <div className="play-menu-title"> Move List </div>
             <div className="play-gradient-line" />
             <div className="move-container">
-              {game.history().map((move, index) => (
-                <div key={index} className="play-menu-item">
-                  {move}
-                </div>
-              ))}
+              <div className="move-list">
+                {game.history().map((move, index) => {
+                  const moveNumber = Math.floor(index / 2) + 1;
+                  const isWhiteMove = index % 2 === 0;
+                  return isWhiteMove ? (
+                    <div key={index} className="move-row">
+                      <div className="move-number">{moveNumber}.</div>
+                      <div className="white-move">{move}</div>
+                      <div className="black-move">
+                        {game.history()[index + 1]
+                          ? game.history()[index + 1]
+                          : ""}
+                      </div>
+                    </div>
+                  ) : null;
+                })}
+              </div>
             </div>
             <div className="play-gradient-line" />
             <div className="play-menu-buttons">
