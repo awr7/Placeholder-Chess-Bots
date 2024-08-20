@@ -185,3 +185,9 @@
     margin-top: 30px;
   }
 }
+
+@media (max-width: 680px) {
+  .home-page {
+    font-size: 28px;
+  }
+}
