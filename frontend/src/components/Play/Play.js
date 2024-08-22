@@ -93,7 +93,13 @@ const Play = () => {
         />
         <div className="play-content">
           <Chessboard
-            width={700}
+            calcWidth={({ screenWidth }) => {
+              return screenWidth <= 680
+                ? screenWidth * 0.9
+                : screenWidth <= 1300
+                ? 600
+                : 700;
+            }}
             position={game.fen()}
             onDrop={onDrop}
             onSquareClick={onSquareClick}
@@ -144,6 +150,20 @@ const Play = () => {
                 New Bot
               </button>
             </div>
+          </div>
+          <div className="mobile-buttons">
+            <button
+              className="play-menu-button"
+              onClick={() => setGame(new Chess())}
+            >
+              Rematch
+            </button>
+            <button
+              className="play-menu-button"
+              onClick={() => setGame(new Chess())}
+            >
+              New Bot
+            </button>
           </div>
         </div>
         <ExpandingLine
