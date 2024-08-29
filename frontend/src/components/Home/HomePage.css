@@ -95,7 +95,7 @@
   margin-top: 30px;
   position: relative;
   width: 25vw;
-  height: 23vw;
+  height: 24vw;
   margin-right: 8px;
   overflow: hidden;
   cursor: pointer;
@@ -183,5 +183,37 @@
   100% {
     width: 50%;
     margin-top: 30px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .title-bar {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 900px) {
+  .title-bar {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 680px) {
+  .home-page {
+    font-size: 28px;
+  }
+
+  .algorithm-menu {
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .algorithm-card {
+    width: 60vw;
+    height: 25vh;
+    margin-right: 0;
+    margin-top: 10px;
   }
 }

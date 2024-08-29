@@ -93,7 +93,19 @@ const Play = () => {
         />
         <div className="play-content">
           <Chessboard
-            width={700}
+            calcWidth={({ screenWidth, screenHeight }) => {
+              let width = 700;
+
+              if (screenWidth <= 1300 || screenHeight <= 900) {
+                width = 600;
+              }
+
+              if (screenWidth <= 680 || screenHeight <= 850) {
+                width = Math.min(screenWidth * 0.9, screenHeight * 0.6);
+              }
+
+              return width;
+            }}
             position={game.fen()}
             onDrop={onDrop}
             onSquareClick={onSquareClick}
@@ -144,6 +156,20 @@ const Play = () => {
                 New Bot
               </button>
             </div>
+          </div>
+          <div className="mobile-buttons">
+            <button
+              className="play-menu-button"
+              onClick={() => setGame(new Chess())}
+            >
+              Rematch
+            </button>
+            <button
+              className="play-menu-button"
+              onClick={() => setGame(new Chess())}
+            >
+              New Bot
+            </button>
           </div>
         </div>
         <ExpandingLine
