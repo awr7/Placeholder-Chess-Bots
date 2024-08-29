@@ -93,12 +93,18 @@ const Play = () => {
         />
         <div className="play-content">
           <Chessboard
-            calcWidth={({ screenWidth }) => {
-              return screenWidth <= 680
-                ? screenWidth * 0.9
-                : screenWidth <= 1300
-                ? 600
-                : 700;
+            calcWidth={({ screenWidth, screenHeight }) => {
+              let width = 700;
+
+              if (screenWidth <= 1300 || screenHeight <= 900) {
+                width = 600;
+              }
+
+              if (screenWidth <= 680 || screenHeight <= 850) {
+                width = Math.min(screenWidth * 0.9, screenHeight * 0.6);
+              }
+
+              return width;
             }}
             position={game.fen()}
             onDrop={onDrop}

@@ -120,14 +120,14 @@
   display: none;
 }
 
-@media (max-width: 1300px) {
+@media (max-width: 1300px), (max-height: 900px) {
   .play-menu {
     width: 350px;
     height: 600px;
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1100px), (max-height: 850px) {
   .play-menu {
     display: none;
   }
@@ -135,11 +135,13 @@
   .play-content {
     flex-direction: column;
     gap: 50px;
+    align-items: center;
   }
 
   .mobile-buttons {
     display: flex;
     justify-content: center;
     gap: 10%;
+    width: 100%;
   }
 }
